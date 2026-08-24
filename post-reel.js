@@ -130,6 +130,7 @@ async function uploadReelToFacebook(videoPath, description) {
     method: "POST",
     headers: {
       Authorization: `OAuth ${FB_PAGE_TOKEN}`,
+      offset: "0",
       "file_size": fileBuffer.length.toString(),
     },
     body: fileBuffer,
