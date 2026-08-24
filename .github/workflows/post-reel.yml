@@ -1,0 +1,46 @@
+name: Post Reel to Facebook
+
+on:
+  schedule:
+    # Times in UTC. IST = UTC + 5:30
+    # 10:00 IST, 14:00 IST, 18:00 IST, 21:00 IST
+    - cron: "30 4 * * *"
+    - cron: "30 8 * * *"
+    - cron: "30 12 * * *"
+    - cron: "30 15 * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Post one reel
+        env:
+          GDRIVE_FOLDER_ID: ${{ secrets.GDRIVE_FOLDER_ID }}
+          GDRIVE_SERVICE_ACCOUNT_JSON: ${{ secrets.GDRIVE_SERVICE_ACCOUNT_JSON }}
+          FB_PAGE_ID: ${{ secrets.FB_PAGE_ID }}
+          FB_PAGE_TOKEN: ${{ secrets.FB_PAGE_TOKEN }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: node post-reel.js
+
+      - name: Commit updated tracking file
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add posted.json
+          git diff --staged --quiet || git commit -m "Update posted.json [skip ci]"
+          git push

@@ -1,0 +1,15 @@
+{
+  "name": "reels-auto-poster",
+  "version": "1.0.0",
+  "description": "Auto-posts AI-generated reels from Google Drive to a Facebook Page",
+  "main": "post-reel.js",
+  "scripts": {
+    "start": "node post-reel.js"
+  },
+  "dependencies": {
+    "googleapis": "^144.0.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
