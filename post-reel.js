@@ -71,6 +71,11 @@ async function downloadDriveFile(drive, fileId, destPath) {
   await new Promise((resolve, reject) => {
     res.data.pipe(dest).on("finish", resolve).on("error", reject);
   });
+
+  const stats = fs.statSync(destPath);
+  if (!stats.size) {
+    throw new Error(`Downloaded file ${destPath} is empty (0 bytes)`);
+  }
 }
 
 async function generateCaption(fileName) {
@@ -126,14 +131,20 @@ async function uploadReelToFacebook(videoPath, description) {
 
   // Step 2: Upload the actual video bytes
   const fileBuffer = fs.readFileSync(videoPath);
+  const fileSize = fileBuffer.length;
+  console.log(`Uploading ${videoPath} (${fileSize} bytes)`);
+
   const uploadRes = await fetch(upload_url, {
     method: "POST",
     headers: {
       Authorization: `OAuth ${FB_PAGE_TOKEN}`,
       offset: "0",
-      "file_size": fileBuffer.length.toString(),
+      file_size: String(fileSize),
+      "Content-Length": String(fileSize),
+      "Content-Type": "application/octet-stream",
     },
     body: fileBuffer,
+    duplex: "half",
   }).then((r) => r.json());
 
   if (uploadRes.success !== true) {
